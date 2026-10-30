@@ -179,7 +179,7 @@ If not available,though not advisable, then we can scrape the data from the web 
 
 9. Content security policy, to control valid sources (trusted ones). Sandbox, to allow form submissions, script loading, etc. X-Frame-Options, to prevent clickjacking, to control where the iframe can be embedded. X-Content-Type-Options, to prevent MIME sniffing.
 
-10. While working with Nodejs or Reactjs, when we need to work with a external package, add it in package manager and install it locally. We can follow similar concept and install Chart.js library locally. While we get access to the package locally, we will need to load it using script, thus we will need to make it available via CDN on our own. Also we would need to manually check for patches, updates, etc.
+10. While working with Nodejs or Reactjs, when we need to work with a external package, add it in package manager and install it locally. We can follow similar concept and install Chart.js library locally. While we get access to the package locally, we will need to load it using script, thus we can cache and serve it via CDN on our own for better performance. Also we would need to manually check for patches, updates, etc.
 
 ### Section 4 : Data-Visualisation Judgment
 11. To show all the 25 sites data over 6 months we can use heatmap, to show each sites performance. Instead of making a single chart encorporating all the 25 companies we can group them based on certain prameters and do comparions using line or bar charts. 
