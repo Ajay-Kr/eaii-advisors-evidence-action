@@ -190,6 +190,8 @@ For colour accessibility, we can follow the WCAG structure and instead of single
 ---
 ## Part B
 
+[🚀 View Live Dashboard](https://ajay-kr.github.io/eaii-advisors-evidence-action/)
+
 Included files: 
 ./index.html
 ./data.json
