@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AP Water Quality Monitoring — Hiring Assessment Dashboard</title>
+
+  <style>
+    :root {
+      --color-bg:             #f5f7fa;
+      --color-surface:        #ffffff;
+      --color-header-bg:      #1e3a5f;
+      --color-header-text:    #ffffff;
+      --color-text:           #1a1a2e;
+      --color-text-muted:     #4b5563;
+      --color-border:         #d1d5db;
+      --color-focus:          #2563eb;
+      --color-error-bg:       #fef2f2;
+      --color-error-border:   #f87171;
+      --color-error-left:     #b91c1c;
+      --color-error-text:     #b91c1c;
+      --color-success-bg:     #f0fdf4;
+      --color-success-border: #86efac;
+      --color-success-left:   #166534;
+      --color-success-text:   #166534;
+      --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --radius:    6px;
+      --sp-xs:     0.25rem;
+      --sp-sm:     0.5rem;
+      --sp-md:     1rem;
+      --sp-lg:     1.5rem;
+      --sp-xl:     2rem;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background:  var(--color-bg);
+      color:       var(--color-text);
+      line-height: 1.6;
+      min-height:  100vh;
+    }
+
+    :focus-visible {
+      outline:        3px solid var(--color-focus);
+      outline-offset: 3px;
+      border-radius:  2px;
+    }
+
+    .skip-link {
+      position:    absolute;
+      top:         -100%;
+      left:        0;
+      padding:     var(--sp-sm) var(--sp-md);
+      background:  var(--color-focus);
+      color:       #ffffff;
+      font-weight: 600;
+      font-size:   0.95rem;
+      text-decoration: none;
+      z-index:     9999;
+      border-bottom-right-radius: var(--radius);
+    }
+    .skip-link:focus { top: 0; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .skip-link { transition: top 0.15s; }
+    }
+
+    .site-header {
+      background: var(--color-header-bg);
+      color:      var(--color-header-text);
+      padding:    var(--sp-md) var(--sp-xl);
+    }
+
+    .site-header__inner {
+      max-width:   960px;
+      margin:      0 auto;
+      display:     flex;
+      align-items: center;
+      gap:         var(--sp-md);
+      flex-wrap:   wrap;
+    }
+
+    .brand-link {
+      color:       var(--color-header-text);
+      text-decoration: none;
+      font-size:   0.8rem;
+      font-weight: 400;
+      opacity:     0.75;
+      white-space: nowrap;
+    }
+    .brand-link:hover,
+    .brand-link:focus { opacity: 1; text-decoration: underline; }
+
+    .site-header h1 {
+      font-size:   1.3rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .page-main {
+      max-width: 960px;
+      margin:    0 auto;
+      padding:   var(--sp-xl) var(--sp-md);
+      display:   flex;
+      flex-direction: column;
+      gap:       var(--sp-md);
+    }
+
+    .loading-banner {
+      display:       flex;
+      align-items:   center;
+      gap:           var(--sp-sm);
+      padding:       var(--sp-md) var(--sp-lg);
+      background:    var(--color-surface);
+      border:        1px solid var(--color-border);
+      border-radius: var(--radius);
+      color:         var(--color-text-muted);
+      font-size:     0.95rem;
+    }
+
+    .loading-spinner {
+      width:        1rem;
+      height:       1rem;
+      border:       2px solid var(--color-border);
+      border-top-color: var(--color-focus);
+      border-radius: 50%;
+      flex-shrink:  0;
+      animation:    spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .loading-spinner { animation: none; }
+    }
+    .error-banner {
+      padding:       var(--sp-md) var(--sp-lg);
+      background:    var(--color-error-bg);
+      border:        1px solid var(--color-error-border);
+      border-left:   4px solid var(--color-error-left);
+      border-radius: var(--radius);
+      color:         var(--color-error-text);
+    }
+
+    .error-banner .error-heading {
+      font-weight:    600;
+      margin-bottom:  var(--sp-xs);
+    }
+
+    .data-summary {
+      padding:       var(--sp-md) var(--sp-lg);
+      background:    var(--color-success-bg);
+      border:        1px solid var(--color-success-border);
+      border-left:   4px solid var(--color-success-left);
+      border-radius: var(--radius);
+    }
+
+    .data-summary h2 {
+      font-size:     1rem;
+      font-weight:   600;
+      color:         var(--color-success-text);
+      margin-bottom: var(--sp-xs);
+    }
+
+    .data-summary p {
+      font-size: 0.95rem;
+      color:     var(--color-success-text);
+    }
+
+    .filter-section {
+      display:         flex;
+      flex-wrap:       wrap;
+      align-items:     center;
+      gap:             var(--sp-sm) var(--sp-md);
+      padding:         var(--sp-md) var(--sp-lg);
+      background:      var(--color-surface);
+      border:          1px solid var(--color-border);
+      border-radius:   var(--radius);
+    }
+
+    .filter-label {
+      font-weight:     600;
+      font-size:       0.95rem;
+      color:           var(--color-text);
+    }
+
+    .filter-select {
+      padding:         var(--sp-xs) var(--sp-sm);
+      font-family:     inherit;
+      font-size:       0.95rem;
+      color:           var(--color-text);
+      background:      var(--color-surface);
+      border:          1px solid var(--color-border);
+      border-radius:   var(--radius);
+      min-height:      44px;
+      min-width:       200px;
+      cursor:          pointer;
+    }
+
+    .kpi-section,
+    .chart-section {
+      display:         flex;
+      flex-direction:  column;
+      gap:             var(--sp-sm);
+    }
+
+    .section-heading {
+      font-size:       1.1rem;
+      font-weight:     600;
+      color:           var(--color-text);
+    }
+
+    .kpi-grid {
+      display:         grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap:             var(--sp-md);
+    }
+
+    .kpi-card {
+      background:      var(--color-surface);
+      border:          1px solid var(--color-border);
+      border-radius:   var(--radius);
+      padding:         var(--sp-md) var(--sp-lg);
+      display:         flex;
+      flex-direction:  column;
+      gap:             var(--sp-xs);
+    }
+
+    .kpi-card__label {
+      font-size:       0.9rem;
+      font-weight:     600;
+      color:           var(--color-text-muted);
+      line-height:     1.3;
+    }
+
+    .kpi-card__value {
+      font-size:       2rem;
+      font-weight:     700;
+      color:           var(--color-text);
+      line-height:     1.2;
+    }
+
+    .kpi-card__unit {
+      font-size:       1.25rem;
+      font-weight:     600;
+      color:           var(--color-text-muted);
+      margin-left:     2px;
+    }
+
+    .site-footer {
+      border-top:  1px solid var(--color-border);
+      padding:     var(--sp-md) var(--sp-xl);
+      color:       var(--color-text-muted);
+      font-size:   0.8rem;
+      text-align:  center;
+    }
+
+    .site-footer__inner { max-width: 960px; margin: 0 auto; }
+
+    @media (max-width: 600px) {
+      .site-header  { padding: var(--sp-md); }
+      .page-main    { padding: var(--sp-md) var(--sp-sm); }
+    }
+
+    [hidden] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="#" class="brand-link">Hiring Assessment</a>
+      <h1>Evidence Action</h1>
+    </div>
+  </header>
+
+  <main id="main-content" class="page-main" aria-busy="true">
+
+    <div role="status" id="loading-status" class="loading-banner">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <p>Loading monitoring data…</p>
+    </div>
+
+    <div role="alert" id="error-alert" class="error-banner" hidden></div>
+
+    <section
+      id="data-summary"
+      class="data-summary"
+      aria-labelledby="summary-heading"
+      hidden
+    >
+      <h2 id="summary-heading">Data Loaded</h2>
+      <p id="summary-text"></p>
+    </section>
+    <section
+      id="filter-section"
+      class="filter-section"
+      aria-labelledby="filter-label"
+      hidden
+    >
+      <label id="filter-label" for="district-filter" class="filter-label">Filter by District:</label>
+      <select id="district-filter" class="filter-select">
+        <option value="all">All districts</option>
+      </select>
+    </section>
+
+    <section
+      id="kpi-section"
+      class="kpi-section"
+      aria-labelledby="kpi-heading"
+      hidden
+    >
+      <h2 id="kpi-heading" class="section-heading">Key Performance Indicators</h2>
+      <div id="kpi-grid" class="kpi-grid"></div>
+    </section>
+
+    <section
+      id="chart-section"
+      class="chart-section"
+      aria-labelledby="chart-heading"
+      hidden
+    >
+      <h2 id="chart-heading" class="section-heading">FRC Coverage % by District</h2>
+      <p id="chart-description" class="chart-description"></p>
+
+      <div class="chart-container">
+        <canvas
+          id="district-chart"
+          role="img"
+          aria-label="Bar chart showing FRC coverage percentage by district across all monitored sites"
+          aria-describedby="chart-description"
+        ></canvas>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table" id="coverage-table">
+          <caption class="table-caption">District FRC monitoring and coverage summary</caption>
+          <thead>
+            <tr>
+              <th scope="col">District</th>
+              <th scope="col">Tested Sites</th>
+              <th scope="col">Sites Passing</th>
+              <th scope="col">FRC Coverage</th>
+            </tr>
+          </thead>
+          <tbody id="coverage-table-body">
+            <!-- Populated dynamically via DOM creation -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <p>
+        Hiring Assesment ·
+        Evidence Action.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+  <script>
+    'use strict';
+
+    const loadingStatus       = document.getElementById('loading-status');
+    const errorAlert          = document.getElementById('error-alert');
+    const dataSummary         = document.getElementById('data-summary');
+    const summaryText         = document.getElementById('summary-text');
+    const mainContent         = document.getElementById('main-content');
+    const filterSection       = document.getElementById('filter-section');
+    const districtFilter      = document.getElementById('district-filter');
+    const kpiSection          = document.getElementById('kpi-section');
+    const kpiGrid             = document.getElementById('kpi-grid');
+    const chartSection        = document.getElementById('chart-section');
+    const districtChartCanvas = document.getElementById('district-chart');
+    const coverageTableBody   = document.getElementById('coverage-table-body');
+    const chartHeading        = document.getElementById('chart-heading');
+    const chartDescription    = document.getElementById('chart-description');
+
+    let allSites = [];
+    let chartInstance = null;
+
+    // ─── Configuration ─────────
+    const KPI_CONFIG = [
+      {
+        id: 'total-sites',
+        label: 'Total Sites',
+        compute(sites) {
+          const safeSites = Array.isArray(sites) ? sites : [];
+          return {
+            value: safeSites.length,
+            unit: ''
+          };
+        }
+      },
+      {
+        id: 'frc-compliance',
+        label: 'FRC \u2265 0.2 mg/L',
+        compute(sites) {
+          const safeSites = Array.isArray(sites) ? sites : [];
+          let testedCount = 0;
+          let passingCount = 0;
+
+          for (const site of safeSites) {
+            if (site && site.frc_mgl !== null && typeof site.frc_mgl === 'number' && !Number.isNaN(site.frc_mgl)) {
+              testedCount++;
+              if (site.frc_mgl >= 0.2) {
+                passingCount++;
+              }
+            }
+          }
+
+          if (testedCount === 0) {
+            return {
+              value: '\u2014',
+              unit: ''
+            };
+          }
+
+          const percentage = (passingCount / testedCount) * 100;
+          return {
+            value: percentage.toFixed(1),
+            unit: '%'
+          };
+        }
+      },
+      {
+        id: 'untested-sites',
+        label: 'Untested Sites',
+        compute(sites) {
+          const safeSites = Array.isArray(sites) ? sites : [];
+          let untestedCount = 0;
+
+          for (const site of safeSites) {
+            if (site && site.frc_mgl === null) {
+              untestedCount++;
+            }
+          }
+
+          return {
+            value: untestedCount,
+            unit: ''
+          };
+        }
+      }
+    ];
+
+    const CHART_CONFIG = {
+      title: 'FRC Coverage % by District',
+      description: 'Percentage of tested sites meeting the FRC threshold, by district.',
+      yAxisLabel: 'FRC Coverage (%)',
+      yMax: 100
+    };
+
+    function computeKPIs(sites) {
+      const safeSites = Array.isArray(sites) ? sites : [];
+      return KPI_CONFIG.map(kpi => {
+        const result = kpi.compute(safeSites);
+        return {
+          id: kpi.id,
+          label: kpi.label,
+          value: result.value,
+          unit: result.unit
+        };
+      });
+    }
+
+    function frcCoverageByDistrict(sites) {
+      const acc = {};
+
+      for (const s of sites) {
+        const d = (acc[s.district] ??= {
+          district: s.district,
+          testedCount: 0,
+          passingCount: 0
+        });
+
+        if (s.frc_mgl == null) continue;
+
+        d.testedCount++;
+
+        if (s.frc_mgl >= 0.2) d.passingCount++;
+      }
+
+      return Object.values(acc).map(v => ({
+        district: v.district,
+        testedCount: v.testedCount,
+        passingCount: v.passingCount,
+        coveragePct: v.testedCount
+          ? Number((100 * v.passingCount / v.testedCount).toFixed(1))
+          : null
+      }));
+    }
+
+    function populateDistrictFilter(sites) {
+      while (districtFilter.firstChild) {
+        districtFilter.removeChild(districtFilter.firstChild);
+      }
+
+      const allOption = document.createElement('option');
+      allOption.value = 'all';
+      allOption.textContent = 'All districts';
+      allOption.selected = true;
+      districtFilter.appendChild(allOption);
+
+      const seenDistricts = new Set();
+      const safeSites = Array.isArray(sites) ? sites : [];
+
+      for (const site of safeSites) {
+        if (site && site.district && !seenDistricts.has(site.district)) {
+          seenDistricts.add(site.district);
+          const option = document.createElement('option');
+          option.value = site.district;
+          option.textContent = site.district;
+          districtFilter.appendChild(option);
+        }
+      }
+    }
+
+    function renderKPIs(sites) {
+      const kpis = computeKPIs(sites);
+
+      while (kpiGrid.firstChild) {
+        kpiGrid.removeChild(kpiGrid.firstChild);
+      }
+
+      for (const kpi of kpis) {
+        const card = document.createElement('article');
+        card.className = 'kpi-card';
+        card.id = 'kpi-' + kpi.id;
+
+        const label = document.createElement('h3');
+        label.className = 'kpi-card__label';
+        label.textContent = kpi.label;
+
+        const value = document.createElement('p');
+        value.className = 'kpi-card__value';
+
+        if (kpi.unit) {
+          const numSpan = document.createElement('span');
+          numSpan.textContent = String(kpi.value);
+
+          const unitSpan = document.createElement('span');
+          unitSpan.className = 'kpi-card__unit';
+          unitSpan.textContent = kpi.unit;
+
+          value.appendChild(numSpan);
+          value.appendChild(unitSpan);
+        } else {
+          value.textContent = String(kpi.value);
+        }
+
+        card.appendChild(label);
+        card.appendChild(value);
+        kpiGrid.appendChild(card);
+      }
+    }
+
+    function renderChart(coverageData) {
+      if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+      }
+
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const labels = coverageData.map(d => d.district);
+      const dataValues = coverageData.map(d => d.coveragePct);
+
+      chartDescription.textContent = CHART_CONFIG.description;
+      districtChartCanvas.setAttribute(
+        'aria-label',
+        'Bar chart showing FRC coverage percentage by district for ' +
+          (districtFilter.value === 'all'
+            ? 'all districts'
+            : districtFilter.value)
+      );
+      
+      chartInstance = new Chart(districtChartCanvas, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: CHART_CONFIG.title,
+            data: dataValues,
+            backgroundColor: '#1e3a5f',
+            borderColor: '#1e3a5f',
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          animation: prefersReducedMotion ? false : { duration: 400 },
+          plugins: {
+            title: {
+              display: true,
+              text: CHART_CONFIG.title,
+              color: '#1a1a2e',
+              font: {
+                size: 14,
+                weight: '600'
+              },
+              padding: {
+                top: 0,
+                bottom: 12
+              }
+            },
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label(context) {
+                  const val = context.parsed.y;
+                  return val !== null && val !== undefined
+                    ? 'Coverage: ' + val.toFixed(1) + '%'
+                    : 'No tested sites';
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              type: 'linear',
+              min: 0,
+              max: CHART_CONFIG.yMax,
+              title: {
+                display: true,
+                text: CHART_CONFIG.yAxisLabel,
+                color: '#1a1a2e',
+                font: {
+                  weight: '600'
+                }
+              },
+              ticks: {
+                stepSize: 10,
+                color: '#4b5563'
+              },
+              grid: {
+                color: '#e5e7eb'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'District',
+                color: '#1a1a2e',
+                font: {
+                  weight: '600'
+                }
+              },
+              ticks: {
+                color: '#1a1a2e'
+              },
+              grid: {
+                display: false
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderCoverageTable(coverageData) {
+      while (coverageTableBody.firstChild) {
+        coverageTableBody.removeChild(coverageTableBody.firstChild);
+      }
+
+      for (const row of coverageData) {
+        const tr = document.createElement('tr');
+
+        const tdDistrict = document.createElement('td');
+        tdDistrict.textContent = row.district;
+
+        const tdTested = document.createElement('td');
+        tdTested.textContent = String(row.testedCount);
+
+        const tdPassing = document.createElement('td');
+        tdPassing.textContent = String(row.passingCount);
+
+        const tdCoverage = document.createElement('td');
+        tdCoverage.textContent = row.coveragePct !== null
+          ? row.coveragePct.toFixed(1) + '%'
+          : '\u2014'; // em dash
+
+        tr.appendChild(tdDistrict);
+        tr.appendChild(tdTested);
+        tr.appendChild(tdPassing);
+        tr.appendChild(tdCoverage);
+
+        coverageTableBody.appendChild(tr);
+      }
+    }
+
+    // ─── Event listeners ─────────────────────────────────────────
+
+    districtFilter.addEventListener('change', () => {
+      const selectedDistrict = districtFilter.value;
+      const filteredSites = selectedDistrict === 'all'
+        ? allSites
+        : allSites.filter(site => site && site.district === selectedDistrict);
+
+      renderKPIs(filteredSites);
+
+      const coverageData = frcCoverageByDistrict(filteredSites);
+
+      renderChart(coverageData);
+      renderCoverageTable(coverageData);
+
+    });
+
+    async function loadData() {
+      try {
+        loadingStatus.hidden = false;
+        errorAlert.hidden = true;
+        dataSummary.hidden = true;
+        filterSection.hidden = true;
+        kpiSection.hidden = true;
+        chartSection.hidden = true;
+        mainContent.setAttribute('aria-busy', 'true');
+
+        // Just for mimicing the delay to show loading
+        // await new Promise(resolve => setTimeout(resolve, 5000));
+        const response = await fetch('data.json');
+
+        if (!response.ok) {
+          throw new Error(
+            'The server returned HTTP\u00a0' + response.status +
+            '\u00a0(' + response.statusText + '). ' +
+            'Check that data.json exists and is accessible.'
+          );
+        }
+
+        let data = await response.json();
+        if (!data) {
+          throw new Error(
+            'The data is missing the required "sites" array.'
+          );
+        }
+
+        showSuccess(data.sites);
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        mainContent.setAttribute('aria-busy', 'false');
+      }
+    }
+
+    function showSuccess(sites) {
+      allSites = sites;
+      loadingStatus.hidden = true;
+
+      const count = sites.length;
+      summaryText.textContent =
+        count + (count === 1 ? ' site record' : ' site records') +
+        ' loaded and ready.';
+      dataSummary.hidden = false;
+
+      populateDistrictFilter(allSites);
+      renderKPIs(allSites);
+
+      const coverageData = frcCoverageByDistrict(allSites);
+      renderChart(coverageData);
+      renderCoverageTable(coverageData);
+
+      filterSection.hidden = false;
+      kpiSection.hidden = false;
+      chartSection.hidden = false;
+    }
+
+    function showError(message) {
+      loadingStatus.hidden = true;
+      filterSection.hidden = true;
+      kpiSection.hidden = true;
+      chartSection.hidden = true;
+      dataSummary.hidden = true;
+
+      const heading = document.createElement('p');
+      heading.className = 'error-heading';
+      heading.textContent = 'Unable to load monitoring data';
+
+      const detail = document.createElement('p');
+      detail.textContent = message;
+
+      errorAlert.appendChild(heading);
+      errorAlert.appendChild(detail);
+      errorAlert.hidden = false;
+    }
+
+    loadData();
+  </script>
+
+</body>
+</html>
